@@ -1,0 +1,1001 @@
+/* =========================================
+   1. VARIABLES & RESET
+   ========================================= */
+:root {
+    --bg-color: #050505;
+    --text-color: #ffffff;
+    --accent-color: #ffffff;
+    --secondary-text: #a0a0a0;
+
+    --inverse-bg: #ffffff;
+    --inverse-text: #050505;
+
+    --font-heading: 'Outfit', sans-serif;
+    --font-body: 'Space Grotesk', monospace;
+
+    --container-width: 1200px;
+    --nav-height: 80px;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    font-family: var(--font-body);
+    line-height: 1.6;
+    overflow-x: hidden;
+    cursor: none;
+    /* We use a custom cursor */
+}
+
+a {
+    text-decoration: none;
+    color: inherit;
+    transition: 0.3s ease;
+}
+
+ul {
+    list-style: none;
+}
+
+img {
+    max-width: 100%;
+    display: block;
+}
+
+/* =========================================
+   2. CUSTOM CURSOR
+   ========================================= */
+.cursor-follower {
+    position: fixed;
+    width: 20px;
+    height: 20px;
+    border: 2px solid var(--accent-color);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 9999;
+    top: 0;
+    left: 0;
+    transform: translate(-50%, -50%);
+    transition: width 0.3s, height 0.3s, background-color 0.3s;
+    mix-blend-mode: difference;
+}
+
+body:hover .cursor-follower {
+    opacity: 1;
+}
+
+/* Hover state for cursor */
+.cursor-active {
+    width: 50px;
+    height: 50px;
+    background-color: var(--accent-color);
+    opacity: 0.5;
+    border: none;
+}
+
+/* =========================================
+   3. NAVIGATION
+   ========================================= */
+.navbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: var(--nav-height);
+    display: flex;
+    justify-content: flex-start;
+    /* Left align - User request */
+    align-items: center;
+    padding: 0 5%;
+    z-index: 1000;
+    background: rgba(5, 5, 5, 0.8);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.logo {
+    font-family: var(--font-heading);
+    font-size: 1.5rem;
+    font-weight: 700;
+    letter-spacing: 2px;
+}
+
+.nav-links {
+    display: flex;
+    gap: 3rem;
+}
+
+.nav-link {
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.nav-link i {
+    font-size: 1.1rem;
+}
+
+.nav-link::after {
+    content: '';
+    position: absolute;
+    width: 0;
+    height: 1px;
+    bottom: -5px;
+    left: 0;
+    background-color: var(--accent-color);
+    transition: width 0.3s ease;
+}
+
+.nav-link:hover::after {
+    width: 100%;
+}
+
+/* =========================================
+   4. HERO SECTION
+   ========================================= */
+/* =========================================
+   4. HERO SECTION
+   ========================================= */
+.hero-section {
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    position: relative;
+    padding: 0 5%;
+    overflow: hidden;
+    /* Ensure snow doesn't cause scrollbar if it goes out/resize */
+}
+
+#snow-canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    /* Critical: Snow is not hoverable */
+    z-index: 1;
+    /* Below text, above background */
+    opacity: 0.7;
+    /* Dull white visibility */
+}
+
+.hero-split {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    max-width: var(--container-width);
+    margin: 0 auto;
+    gap: 4rem;
+    position: relative;
+    z-index: 2;
+    /* Text sits on top */
+}
+
+.hero-left {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.hero-name {
+    font-family: var(--font-heading);
+    font-size: clamp(3rem, 6vw, 5rem);
+    font-weight: 800;
+    line-height: 1;
+    text-transform: uppercase;
+    margin-bottom: 0.5rem;
+}
+
+.hero-role-small {
+    font-family: var(--font-body);
+    font-size: clamp(1rem, 2vw, 1.5rem);
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    margin-bottom: 2rem;
+    color: var(--secondary-text);
+}
+
+/* Hover Invert Effect is handled by Javascript Cursor (mix-blend-mode) */
+/* No box background here as per user request */
+.hover-invert-word {
+    display: inline-block;
+}
+
+.hero-cta-mini {
+    margin-top: 2rem;
+    display: flex;
+    gap: 2rem;
+}
+
+.hero-right {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    height: 100%;
+    align-items: center;
+}
+
+.typewriter-text {
+    font-family: var(--font-typewriter);
+    font-size: 1.1rem;
+    line-height: 1.6;
+    color: var(--secondary-text);
+    white-space: pre-wrap;
+    min-height: 120px;
+    border-right: 2px solid var(--text-color);
+    padding-right: 5px;
+    animation: blink-caret 0.75s step-end infinite;
+    max-width: 90%;
+}
+
+@keyframes blink-caret {
+
+    from,
+    to {
+        border-color: transparent
+    }
+
+    50% {
+        border-color: var(--text-color)
+    }
+}
+
+/* ... previous styles ... */
+
+.btn {
+    padding: 1rem 2rem;
+    font-family: var(--font-heading);
+    text-transform: uppercase;
+    font-weight: 700;
+    letter-spacing: 1px;
+    border: 2px solid var(--text-color);
+    border-radius: 6px;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    background: transparent;
+    color: var(--text-color);
+    /* Flex for icon alignment */
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.btn-primary:hover {
+    background: var(--text-color);
+    color: var(--bg-color);
+    border-color: var(--text-color);
+}
+
+.btn-secondary:hover {
+    background: var(--text-color);
+    color: var(--bg-color);
+    border-color: var(--text-color);
+}
+
+/* =========================================
+   SOCIAL SIDEBAR
+   ========================================= */
+.social-sidebar {
+    position: absolute;
+    /* Stick to hero section right side */
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    /* Fixes stretch issue: items allow independent width */
+    z-index: 100;
+}
+
+.social-link {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    /* Icon on Left, Text on Right */
+    flex-direction: row;
+    width: 60px;
+    /* Increased slightly for comfort */
+    height: 50px;
+    background-color: #333;
+    color: #fff;
+    text-decoration: none;
+    transition: width 0.3s ease, background-color 0.3s;
+    overflow: hidden;
+    white-space: nowrap;
+    position: relative;
+    cursor: pointer;
+    padding-left: 18px;
+    /* Center icon: (60 width - approx 24 icon) / 2 */
+}
+
+/* Icon (1st in HTML) */
+.social-link i {
+    font-size: 1.5rem;
+    flex-shrink: 0;
+    margin-right: 15px;
+    /* Space between Icon and Text */
+}
+
+/* Text (2nd in HTML) */
+.social-text {
+    font-family: var(--font-heading);
+    font-weight: 600;
+    opacity: 0;
+    transition: opacity 0.3s;
+    /* Removed transform to simplify */
+}
+
+.social-link:hover {
+    width: 180px;
+    /* Expand width */
+}
+
+.social-link:hover .social-text {
+    opacity: 1;
+}
+
+/* Brand Colors */
+.linkedin {
+    background-color: #0077b5;
+}
+
+.github {
+    background-color: #24292e;
+}
+
+.email {
+    background-color: #ffffff;
+    color: #000;
+}
+
+/* Fix email text color if needed against white bg */
+.email:hover {
+    background-color: #f0f0f0;
+}
+
+/* =========================================
+   5. ABOUT SECTION
+   ========================================= */
+.about-section {
+    padding: 4rem 5%;
+    text-align: center;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.about-text {
+    font-size: 1.2rem;
+    color: var(--secondary-text);
+}
+
+/* =========================================
+   6. SKILLS SECTION (DIAGONAL SPLIT)
+   ========================================= */
+.skills-section {
+    position: relative;
+    width: 100%;
+    min-height: 80vh;
+    /* Reduced height slightly as per design feel */
+    overflow: hidden;
+    margin: 5rem 0;
+    display: flex;
+    justify-content: center;
+    /* Center header */
+}
+
+/* New Centered Header */
+.skills-header {
+    position: absolute;
+    top: 5%;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 10;
+    text-align: center;
+    pointer-events: none;
+    /* Let clicks pass through */
+    mix-blend-mode: difference;
+    /* Inverts color against bg */
+    color: #fff;
+    /* White - Black = White (on black), White - White = Black (on white) */
+}
+
+.skills-header h2 {
+    font-family: var(--font-heading);
+    font-size: 2.5rem;
+    /* Smaller font as requested */
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}
+
+.diagonal-wrapper {
+    position: relative;
+    width: 100%;
+    height: 100vh;
+    display: flex;
+}
+
+/* Left/Top Half (White) */
+.diagonal-white {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: var(--inverse-bg);
+    /* #fff */
+    clip-path: polygon(0 0, 100% 0, 0 100%);
+    z-index: 1;
+}
+
+/* Right/Bottom Half (Black) */
+.diagonal-black {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: var(--bg-color);
+    /* #050505 */
+    z-index: 0;
+}
+
+/* Network Nodes */
+.skills-network {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 2;
+    /* Above both diagonals */
+    pointer-events: none;
+}
+
+.skill-node {
+    position: absolute;
+    /* KEY FOR INVERSION: White Object, Black Text & Icon */
+    background-color: #ffffff;
+    color: #000000;
+
+    width: 100px;
+    /* Increased from 50px */
+    height: 100px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.5rem;
+    /* Increased Icon size */
+    cursor: pointer;
+    pointer-events: auto;
+
+    /* The Magic Sauce */
+    mix-blend-mode: exclusion;
+    transition: transform 0.3s ease, border-radius 0.3s;
+}
+
+/* Hover State: Restore color and scale */
+.skill-node:hover {
+    transform: scale(1.15);
+    /* Slightly reduced scale since base is larger */
+    mix-blend-mode: normal;
+    /* Disable difference to show true color */
+    z-index: 20;
+    /* Pop to top */
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
+}
+
+.skill-node:hover i {
+    color: inherit;
+    /* Use the parent's color */
+}
+
+/* Specific Brand Colors on Hover */
+.skill-node[data-skill="React"]:hover {
+    background: #20232a;
+    color: #61dafb;
+}
+
+.skill-node[data-skill="JavaScript"]:hover {
+    background: #323330;
+    color: #f7df1e;
+}
+
+.skill-node[data-skill="Python"]:hover {
+    background: #306998;
+    color: #ffe873;
+}
+
+.skill-node[data-skill="Java"]:hover {
+    background: #fff;
+    color: #5382a1;
+}
+
+.skill-node[data-skill="HTML5"]:hover {
+    background: #fff;
+    color: #e34f26;
+}
+
+.skill-node[data-skill="CSS3"]:hover {
+    background: #fff;
+    color: #1572b6;
+}
+
+.skill-node[data-skill="Node.js"]:hover {
+    background: #333;
+    color: #68a063;
+}
+
+.skill-node[data-skill="SQL"]:hover {
+    background: #fff;
+    color: #00758f;
+}
+
+.skill-node[data-skill="Git"]:hover {
+    background: #fca326;
+    color: #3e2c00;
+}
+
+/* Git Orange */
+.skill-node[data-skill="Bootstrap"]:hover {
+    background: #563d7c;
+    color: #fff;
+}
+
+
+/* Tooltip (Name) */
+.skill-node::after {
+    content: attr(data-skill);
+    position: absolute;
+    bottom: -25px;
+    left: 50%;
+    transform: translateX(-50%);
+    opacity: 0;
+    white-space: nowrap;
+    transition: opacity 0.3s;
+    font-size: 0.7rem;
+    letter-spacing: 1px;
+    font-family: var(--font-mono);
+    color: #fff;
+    /* Default to white text for tooltip */
+    text-shadow: 0 0 2px #000;
+    /* Shadow for visibility on white bg */
+    pointer-events: none;
+}
+
+.skill-node:hover::after {
+    opacity: 1;
+}
+
+/* =========================================
+   7. EDUCATION SECTION
+   ========================================= */
+.education-section {
+    padding: 5rem 5%;
+    background-color: var(--inverse-bg);
+    /* White per request */
+    color: var(--inverse-text);
+    /* Black text */
+    position: relative;
+    overflow: hidden;
+}
+
+.section-title {
+    font-family: var(--font-heading);
+    font-size: 3rem;
+    text-transform: uppercase;
+    margin-bottom: 4rem;
+    text-align: center;
+}
+
+.timeline-container {
+    position: relative;
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 2rem 0;
+}
+
+.timeline-line {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 50%;
+    width: 2px;
+    background-color: rgba(0, 0, 0, 0.1);
+    /* Faint line initially */
+    transform: translateX(-50%);
+}
+
+.timeline-ball {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    width: 15px;
+    height: 15px;
+    background-color: #000;
+    border-radius: 50%;
+    transform: translate(-50%, 0);
+    z-index: 10;
+}
+
+.timeline-item {
+    width: 50%;
+    padding: 2rem;
+    position: relative;
+    opacity: 0;
+    /* Animated in with GSAP */
+    transform: translateY(20px);
+}
+
+.timeline-item.left {
+    left: 0;
+    text-align: right;
+    padding-right: 3rem;
+}
+
+.timeline-item.right {
+    left: 50%;
+    text-align: left;
+    padding-left: 3rem;
+}
+
+.timeline-content h3 {
+    font-family: var(--font-heading);
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.timeline-content .date {
+    display: block;
+    font-size: 0.9rem;
+    color: #666;
+    margin-bottom: 1rem;
+    font-family: var(--font-mono);
+}
+
+/* =========================================
+   8. PROJECTS SECTION
+   ========================================= */
+.projects-section {
+    padding: 5rem 5%;
+    background-color: var(--inverse-bg);
+    color: var(--inverse-text);
+}
+
+.project-card {
+    display: flex;
+    align-items: center;
+    margin-bottom: 8rem;
+    gap: 4rem;
+}
+
+.project-card.alternate {
+    flex-direction: row-reverse;
+}
+
+.project-image {
+    flex: 1;
+    height: 400px;
+    background-color: #f0f0f0;
+    overflow: hidden;
+    position: relative;
+    border-radius: 8px;
+    /* Optional slight round */
+}
+
+/* Placeholder styling for now */
+.img-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    background: #e0e0e0;
+    color: #888;
+}
+
+.project-info {
+    flex: 1;
+}
+
+.project-info h3 {
+    font-family: var(--font-heading);
+    font-size: 2.5rem;
+    margin-bottom: 0.5rem;
+    line-height: 1.1;
+}
+
+.tech-stack {
+    color: #666;
+    font-family: var(--font-mono);
+    margin-bottom: 1.5rem;
+}
+
+.desc {
+    font-size: 1.1rem;
+    margin-bottom: 2rem;
+    line-height: 1.8;
+}
+
+.project-links {
+    display: flex;
+    gap: 1rem;
+}
+
+/* Inverse Button: White BG (implied), Black Border/Text -> Hover: Black BG, White Text */
+.btn-inverse {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.8rem 1.5rem;
+    border: 1px solid #000;
+    color: #000;
+    font-family: var(--font-heading);
+    text-transform: uppercase;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.btn-inverse:hover {
+    background-color: #000;
+    color: #fff;
+}
+
+/* =========================================
+   9. FOOTER
+   ========================================= */
+.footer-section {
+    padding: 5rem 5% 2rem;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    text-align: center;
+}
+
+.footer-content h2 {
+    font-family: var(--font-heading);
+    font-size: 3rem;
+    margin-bottom: 3rem;
+}
+
+.contact-grid {
+    display: flex;
+    justify-content: center;
+    gap: 3rem;
+    flex-wrap: wrap;
+    margin-bottom: 4rem;
+}
+
+.contact-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    opacity: 0.7;
+    transition: opacity 0.3s;
+}
+
+.contact-item:hover {
+    opacity: 1;
+}
+
+.contact-item i {
+    font-size: 2rem;
+}
+
+.contact-item span {
+    font-family: var(--font-mono);
+}
+
+.copyright {
+    color: var(--secondary-text);
+    font-size: 0.9rem;
+}
+
+/* =========================================
+   10. MEDIA QUERIES
+   ========================================= */
+/* =========================================
+   10. MEDIA QUERIES
+   ========================================= */
+
+/* Tablet (1024px) */
+@media (max-width: 1024px) {
+    .container {
+        width: 90%;
+    }
+
+    .social-sidebar {
+        display: none;
+        /* Hide for Tablet */
+    }
+
+    .hero-name {
+        font-size: 4rem;
+    }
+
+    .hero-split {
+        gap: 2rem;
+        justify-content: center;
+    }
+
+    /* Fix Centering: Prevent stretching */
+    .hero-left,
+    .hero-right {
+        flex: 0 1 auto;
+        width: auto;
+        text-align: center;
+    }
+
+    .hero-right {
+        justify-content: center;
+    }
+
+    .hero-left {
+        align-items: center;
+    }
+}
+
+/* Mobile (768px) */
+@media (max-width: 768px) {
+    .navbar {
+        padding: 0 1rem;
+        justify-content: center;
+        /* Center the icons */
+        height: 60px;
+        /* Slightly smaller mobile nav */
+    }
+
+    .nav-links {
+        display: flex;
+        /* Restore display */
+        gap: 1.5rem;
+        /* Smaller gap */
+        width: 100%;
+        justify-content: center;
+    }
+
+    .nav-link {
+        font-size: 0;
+        /* Hide text (Home, Skills etc) */
+        gap: 0;
+    }
+
+    .nav-link i {
+        font-size: 1.4rem;
+        /* Ensure icon is visible and decent size */
+        margin: 0;
+    }
+
+    .hero-section {
+        padding-top: 60px;
+        /* Offset for nav */
+        height: auto;
+        min-height: 100vh;
+        display: block;
+        /* Allow stacking */
+    }
+
+    .hero-split {
+        flex-direction: column;
+        gap: 2rem;
+        text-align: center;
+        justify-content: center;
+        padding-top: 4rem;
+        /* Push down mostly */
+        height: 100%;
+    }
+
+    .hero-left {
+        width: 100%;
+        align-items: center;
+    }
+
+    .hero-right {
+        width: 100%;
+        justify-content: center;
+        text-align: center;
+        min-height: auto;
+        margin-top: 2rem;
+    }
+
+    .hero-name {
+        font-size: 3rem;
+    }
+
+    .hero-role-small {
+        font-size: 1rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .hero-cta-mini {
+        justify-content: center;
+        flex-wrap: wrap;
+        /* Stack buttons if very small */
+    }
+
+    /* Hide Social Sidebar on Mobile */
+    .social-sidebar {
+        display: none;
+    }
+
+    /* Sections */
+    .diagonal-wrapper {
+        flex-direction: column;
+    }
+
+    .diagonal-white {
+        clip-path: none;
+        position: relative;
+        height: auto;
+        min-height: 300px;
+        padding: 4rem 2rem;
+        justify-content: center;
+        text-align: center;
+        width: 100%;
+    }
+
+    .diagonal-black {
+        position: relative;
+        height: auto;
+        min-height: 300px;
+        width: 100%;
+    }
+
+    .skills-network {
+        position: relative;
+        /* Let it flow in black section? No, keeps absolute logic inside relative parent */
+        height: 300px;
+        /* Force height for nodes area */
+    }
+
+    .timeline-line {
+        left: 20px;
+    }
+
+    .timeline-container {
+        padding-left: 0;
+    }
+
+    .timeline-item {
+        width: 100%;
+        padding-left: 3rem;
+        padding-right: 0;
+        text-align: left;
+    }
+
+    .timeline-item.left,
+    .timeline-item.right {
+        left: 0;
+        text-align: left;
+    }
+
+    .project-card,
+    .project-card.alternate {
+        flex-direction: column;
+        gap: 2rem;
+    }
+
+    .project-image {
+        width: 100%;
+        height: 250px;
+    }
+}
