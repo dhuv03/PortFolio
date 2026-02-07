@@ -52,56 +52,542 @@ window.addEventListener('load', () => {
 });
 
 /* =========================================
-   3. SKILLS NETWORK (LAYOUT & FLOATING)
+   2.5 NAVBAR DIRECTIONAL UNDERLINE
    ========================================= */
+const navLinks = document.querySelectorAll('.nav-link');
+
+navLinks.forEach(link => {
+    link.addEventListener('mouseenter', function (e) {
+        const rect = this.getBoundingClientRect();
+        const mouseX = e.clientX;
+        const linkCenterX = rect.left + rect.width / 2;
+
+        // Remove both classes first
+        this.classList.remove('hover-from-left', 'hover-from-right');
+
+        // Determine direction based on mouse position relative to link center
+        if (mouseX < linkCenterX) {
+            // Mouse entered from left side
+            this.classList.add('hover-from-left');
+        } else {
+            // Mouse entered from right side
+            this.classList.add('hover-from-right');
+        }
+    });
+
+    link.addEventListener('mouseleave', function (e) {
+        const rect = this.getBoundingClientRect();
+        const mouseX = e.clientX;
+        const linkCenterX = rect.left + rect.width / 2;
+
+        // Remove both classes first
+        this.classList.remove('hover-from-left', 'hover-from-right');
+
+        // Determine exit direction
+        if (mouseX < linkCenterX) {
+            // Mouse exiting to the left
+            this.classList.add('hover-from-right'); // Collapse to right
+        } else {
+            // Mouse exiting to the right
+            this.classList.add('hover-from-left'); // Collapse to left
+        }
+    });
+});
+
 /* =========================================
    3. SKILLS NETWORK (LAYOUT & FLOATING)
    ========================================= */
-const nodes = document.querySelectorAll('.skill-node');
+/* =========================================
+   3. SKILLS NETWORK (PHYSICS & INTERACTION)
+   ========================================= */
+const skillsSection = document.querySelector('.skills-section');
+const header = document.querySelector('.skills-header');
+const headerTitle = document.getElementById('animated'); // The text container
+const nodes = Array.from(document.querySelectorAll('.skill-node'));
 
-// Initial Random Positioning
-// We want them scattered but not too close to edges if possible
-const positions = [
-    { top: '15%', left: '15%' },
-    { top: '25%', left: '60%' },
-    { top: '50%', left: '45%' },
-    { top: '65%', left: '25%' },
-    { top: '75%', left: '75%' },
-    { top: '20%', left: '40%' },
-    { top: '80%', left: '40%' },
-    { top: '40%', left: '10%' },
-    { top: '45%', left: '85%' },
-    { top: '85%', left: '10%' },
-];
+// Physics Constants
+const DAMPING = 0.99; // Friction
+const VELOCITY_LIMIT = 3;
+const REPULSION_FORCE = 0.5;
+const HEADER_BUFFER = 20;
 
-nodes.forEach((node, index) => {
-    // Set Initial Position
-    const pos = positions[index] || { top: Math.random() * 80 + 10 + '%', left: Math.random() * 80 + 10 + '%' };
-    node.style.top = pos.top;
-    node.style.left = pos.left;
+// State
+let bounds = { width: 0, height: 0, left: 0, top: 0 };
+let headerRect = { left: 0, right: 0, top: 0, bottom: 0, width: 0, height: 0 };
+let physicsNodes = [];
 
-    // Start Wandering Animation
-    animateNode(node);
+// Initialize Physics Nodes
+function initPhysics() {
+    updateBounds();
+
+    physicsNodes = nodes.map((element, index) => {
+        // Random initial positions if not set, or parse current
+        const rect = element.getBoundingClientRect();
+        // Start roughly in the center area if first load, or use existing top/left
+        let x = Math.random() * (bounds.width - 100);
+        let y = Math.random() * (bounds.height - 100);
+
+        // Random Velocity (Slower on mobile)
+        const isMobile = window.innerWidth <= 768;
+        const speedFactor = isMobile ? 1.5 : 3;
+
+        let vx = (Math.random() - 0.5) * speedFactor;
+        let vy = (Math.random() - 0.5) * speedFactor;
+
+        return {
+            element,
+            x: x,
+            y: y,
+            vx: vx,
+            vy: vy,
+            radius: element.offsetWidth / 2, // 50px usually
+            isDragging: false,
+            mass: 1,
+            originalRadius: element.offsetWidth / 2
+        };
+    });
+
+    animatePhysics();
+}
+
+function updateBounds() {
+    const rect = skillsSection.getBoundingClientRect();
+    bounds.width = rect.width;
+    bounds.height = rect.height;
+    bounds.left = rect.left;
+    bounds.top = rect.top;
+
+    // Heading Rect relative to section
+    const hRect = header.getBoundingClientRect();
+    headerRect = {
+        left: hRect.left - rect.left - HEADER_BUFFER,
+        right: hRect.right - rect.left + HEADER_BUFFER,
+        top: hRect.top - rect.top - HEADER_BUFFER,
+        bottom: hRect.bottom - rect.top + HEADER_BUFFER,
+        width: hRect.width + (HEADER_BUFFER * 2),
+        height: hRect.height + (HEADER_BUFFER * 2)
+    };
+}
+
+// Main Physics Loop
+function animatePhysics() {
+    // 1. Update Positions
+    physicsNodes.forEach(node => {
+        if (node.isDragging) return; // Skip position update if dragging
+
+        // Apply slight random wandering force
+        node.vx += (Math.random() - 0.5) * 0.2;
+        node.vy += (Math.random() - 0.5) * 0.2;
+
+        // Apply friction
+        node.vx *= DAMPING;
+        node.vy *= DAMPING;
+
+        // Limit Velocity
+        const speed = Math.sqrt(node.vx * node.vx + node.vy * node.vy);
+        if (speed > VELOCITY_LIMIT) {
+            node.vx = (node.vx / speed) * VELOCITY_LIMIT;
+            node.vy = (node.vy / speed) * VELOCITY_LIMIT;
+        }
+
+        node.x += node.vx;
+        node.y += node.vy;
+    });
+
+    // Update Header Rect Dynamically (since it moves or changes size)
+    // We treat the header as a static obstacle for this frame
+    if (header) {
+        const hRect = header.getBoundingClientRect();
+        const pRect = skillsSection.getBoundingClientRect();
+
+        // Update headerRect specifically for collision
+        headerRect = {
+            left: hRect.left - pRect.left,
+            right: hRect.right - pRect.left,
+            top: hRect.top - pRect.top,
+            bottom: hRect.bottom - pRect.top,
+            width: hRect.width,
+            height: hRect.height
+        };
+    }
+
+    // 2. Resolve Collisions
+    // A. Wall Collisions
+    physicsNodes.forEach(node => {
+        // Right Wall
+        if (node.x + node.radius * 2 > bounds.width) {
+            node.x = bounds.width - node.radius * 2;
+            node.vx *= -1;
+        }
+        // Left Wall
+        if (node.x < 0) {
+            node.x = 0;
+            node.vx *= -1;
+        }
+        // Bottom Wall
+        if (node.y + node.radius * 2 > bounds.height) {
+            node.y = bounds.height - node.radius * 2;
+            node.vy *= -1;
+        }
+        // Top Wall
+        if (node.y < 0) {
+            node.y = 0;
+            node.vy *= -1;
+        }
+    });
+
+    // B. Header Collision (Circle-Rectangle Collision)
+    physicsNodes.forEach(node => {
+        const cx = node.x + node.radius;
+        const cy = node.y + node.radius;
+
+        // Find closest point on the header rectangle to the circle center
+        // Clamp center to the box
+        let testX = cx;
+        let testY = cy;
+
+        if (cx < headerRect.left) testX = headerRect.left;
+        else if (cx > headerRect.right) testX = headerRect.right;
+
+        if (cy < headerRect.top) testY = headerRect.top;
+        else if (cy > headerRect.bottom) testY = headerRect.bottom;
+
+        // Distance from closest point to center
+        const distX = cx - testX;
+        const distY = cy - testY;
+        const distance = Math.sqrt((distX * distX) + (distY * distY));
+
+        // Check collision
+        if (distance < node.radius) {
+            // Collision detected
+
+            // Calculate Normal Vector
+            let nx = distX;
+            let ny = distY;
+
+            // Edge case: Center is inside the rectangle (distX and distY are 0 if we clamp strictly)
+            // Wait, if Center is INSIDE, clamp checks will simply return the center coordinates? 
+            // No, clamp returns the *edge* coordinates if inside? No, clamp returns the value itself if inside.
+            // If inside, cx matches testX, cy matches testY => distance = 0.
+
+            if (distance === 0) {
+                // Deep overlap (center inside rect)
+                // Find nearest edge to push out
+                const dLeft = cx - headerRect.left;
+                const dRight = headerRect.right - cx;
+                const dTop = cy - headerRect.top;
+                const dBottom = headerRect.bottom - cy;
+
+                const min = Math.min(dLeft, dRight, dTop, dBottom);
+
+                if (min === dLeft) { nx = -1; ny = 0; }
+                else if (min === dRight) { nx = 1; ny = 0; }
+                else if (min === dTop) { nx = 0; ny = -1; }
+                else { nx = 0; ny = 1; }
+
+                // Push out
+                node.x += nx * (node.radius - distance + 5);
+                node.y += ny * (node.radius - distance + 5);
+
+            } else {
+                // Normal bounce off corner or edge
+                const len = distance;
+                nx /= len; // Normalize
+                ny /= len;
+
+                // Push out to surface
+                const overlap = node.radius - distance;
+                node.x += nx * overlap;
+                node.y += ny * overlap;
+            }
+
+            // Reflect Velocity: V_new = V_old - 2 * (V_old . N) * N
+            const dot = node.vx * nx + node.vy * ny;
+
+            // Only reflect if moving towards the object
+            if (dot < 0) {
+                node.vx = node.vx - 2 * dot * nx;
+                node.vy = node.vy - 2 * dot * ny;
+
+                // Add some energy loss/gain or randomization
+                node.vx *= 1.1; // Slightly "bouncy"
+                node.vy *= 1.1;
+            }
+        }
+    });
+
+    // C. Node-Node Collisions
+    for (let i = 0; i < physicsNodes.length; i++) {
+        for (let j = i + 1; j < physicsNodes.length; j++) {
+            const p1 = physicsNodes[i];
+            const p2 = physicsNodes[j];
+
+            const dx = (p2.x + p2.radius) - (p1.x + p1.radius);
+            const dy = (p2.y + p2.radius) - (p1.y + p1.radius);
+            const distance = Math.sqrt(dx * dx + dy * dy);
+            const minDistance = p1.radius + p2.radius;
+
+            if (distance < minDistance) {
+                // Collision Detected!
+
+                // Trigger Wobble if significant impact
+                const impact = Math.sqrt((p1.vx - p2.vx) ** 2 + (p1.vy - p2.vy) ** 2);
+                if (impact > 0.5) {
+                    triggerWobble(p1.element);
+                    triggerWobble(p2.element);
+                }
+
+                // Resolve Overlap
+                const overlap = minDistance - distance;
+                const nx = dx / distance; // Normal X
+                const ny = dy / distance; // Normal Y
+
+                // Move apart proportional to overlap
+                const moveX = nx * overlap * 0.5;
+                const moveY = ny * overlap * 0.5;
+
+                // If one is dragging, it doesn't move, the other takes full force
+                if (p1.isDragging && !p2.isDragging) {
+                    p2.x += moveX * 2;
+                    p2.y += moveY * 2;
+                    p2.vx += nx * 2; // Add "push" velocity
+                    p2.vy += ny * 2;
+                } else if (!p1.isDragging && p2.isDragging) {
+                    p1.x -= moveX * 2;
+                    p1.y -= moveY * 2;
+                    p1.vx -= nx * 2;
+                    p1.vy -= ny * 2;
+                } else {
+                    // Both free
+                    p1.x -= moveX;
+                    p1.y -= moveY;
+                    p2.x += moveX;
+                    p2.y += moveY;
+
+                    // Swap Velocities (Simple Elastic)
+                    // ...actually better to just simple bounce vector math?
+                    // Simplified: Exchange normal velocity components + restitution
+
+                    // Separation vector is (nx, ny)
+                    // Relative velocity in normal direction
+                    const dvx = p2.vx - p1.vx;
+                    const dvy = p2.vy - p1.vy;
+                    const velAlongNormal = dvx * nx + dvy * ny;
+
+                    if (velAlongNormal < 0) {
+                        // Closing in
+                        const restitution = 0.9; // Bounciness
+                        const jVal = -(1 + restitution) * velAlongNormal;
+                        // Assuming equal mass for simplicity (1)
+                        // impulse = j / (1/m1 + 1/m2) = j / 2
+                        const impulse = jVal / 2;
+
+                        p1.vx -= impulse * nx;
+                        p1.vy -= impulse * ny;
+                        p2.vx += impulse * nx;
+                        p2.vy += impulse * ny;
+                    }
+                }
+            }
+        }
+    }
+
+    // 3. Render
+    physicsNodes.forEach(node => {
+        node.element.style.left = node.x + 'px';
+        node.element.style.top = node.y + 'px';
+    });
+
+    requestAnimationFrame(animatePhysics);
+}
+
+function triggerWobble(element) {
+    // restart animation
+    element.classList.remove('wobble-anim');
+    void element.offsetWidth; // trigger reflow
+    element.classList.add('wobble-anim');
+}
+
+// 4. Interaction (Drag - Mouse and Touch)
+let draggedNode = null;
+let dragOffset = { x: 0, y: 0 };
+
+// Mouse Events
+document.addEventListener('mousedown', startDrag);
+document.addEventListener('mousemove', drag);
+document.addEventListener('mouseup', endDrag);
+
+// Touch Events for Mobile
+document.addEventListener('touchstart', handleTouchStart, { passive: false });
+document.addEventListener('touchmove', handleTouchMove, { passive: false });
+document.addEventListener('touchend', handleTouchEnd);
+
+function startDrag(e) {
+    if (e.target.closest('.skill-node')) {
+        const element = e.target.closest('.skill-node');
+        const node = physicsNodes.find(n => n.element === element);
+        if (node) {
+            draggedNode = node;
+            node.isDragging = true;
+            // Calculate offset within the bubble
+            const rect = element.getBoundingClientRect();
+            const parentRect = skillsSection.getBoundingClientRect();
+
+            // Mouse relative to section
+            const mouseX = e.clientX - parentRect.left;
+            const mouseY = e.clientY - parentRect.top;
+
+            dragOffset.x = mouseX - node.x;
+            dragOffset.y = mouseY - node.y;
+
+            // Kill velocity while dragging
+            node.vx = 0;
+            node.vy = 0;
+
+            element.style.cursor = 'grabbing';
+        }
+    }
+}
+
+function drag(e) {
+    if (draggedNode) {
+        e.preventDefault();
+        const parentRect = skillsSection.getBoundingClientRect();
+        const mouseX = e.clientX - parentRect.left;
+        const mouseY = e.clientY - parentRect.top;
+
+        // Previous pos to calculate throwing velocity
+        const prevX = draggedNode.x;
+        const prevY = draggedNode.y;
+
+        draggedNode.x = mouseX - dragOffset.x;
+        draggedNode.y = mouseY - dragOffset.y;
+
+        // Calculate velocity for "throw" effect on release
+        draggedNode.vx = (draggedNode.x - prevX) * 0.5; // Scale down a bit
+        draggedNode.vy = (draggedNode.y - prevY) * 0.5;
+    }
+}
+
+function endDrag() {
+    if (draggedNode) {
+        draggedNode.isDragging = false;
+        draggedNode.element.style.cursor = 'pointer';
+        draggedNode = null;
+    }
+}
+
+// Touch Event Handlers
+function handleTouchStart(e) {
+    if (e.target.closest('.skill-node')) {
+        e.preventDefault();
+        const touch = e.touches[0];
+        const element = e.target.closest('.skill-node');
+        const node = physicsNodes.find(n => n.element === element);
+
+        if (node) {
+            draggedNode = node;
+            node.isDragging = true;
+
+            const parentRect = skillsSection.getBoundingClientRect();
+            const touchX = touch.clientX - parentRect.left;
+            const touchY = touch.clientY - parentRect.top;
+
+            dragOffset.x = touchX - node.x;
+            dragOffset.y = touchY - node.y;
+
+            node.vx = 0;
+            node.vy = 0;
+        }
+    }
+}
+
+function handleTouchMove(e) {
+    if (draggedNode) {
+        e.preventDefault();
+        const touch = e.touches[0];
+        const parentRect = skillsSection.getBoundingClientRect();
+        const touchX = touch.clientX - parentRect.left;
+        const touchY = touch.clientY - parentRect.top;
+
+        const prevX = draggedNode.x;
+        const prevY = draggedNode.y;
+
+        draggedNode.x = touchX - dragOffset.x;
+        draggedNode.y = touchY - dragOffset.y;
+
+        draggedNode.vx = (draggedNode.x - prevX) * 0.5;
+        draggedNode.vy = (draggedNode.y - prevY) * 0.5;
+    }
+}
+
+function handleTouchEnd(e) {
+    if (draggedNode) {
+        draggedNode.isDragging = false;
+        draggedNode = null;
+    }
+}
+
+// Handle Window Resize
+window.addEventListener('resize', updateBounds);
+
+// Start
+window.addEventListener('load', () => {
+    // Animate Header
+    gsap.to(".skills-header", {
+        y: 15,
+        duration: 2,
+        yoyo: true,
+        repeat: -1,
+        ease: "sine.inOut"
+    });
+
+    // Init physics
+    setTimeout(initPhysics, 100);
+
+    // Wave Animation for Text
+    updateText("Technical Skills");
 });
 
-function animateNode(node) {
-    // Calculate a new random position relative to current, or absolute?
-    // Let's do absolute constrained random movements to keep them somewhat in view
-    // We can use xPercent/yPercent for movement relative to their start point
+function updateText(text) {
+    let delay = 200;
+    let h1 = document.getElementById("animated");
 
-    // Move to a random point within +/- 150px of origin (or viewport based)
-    // To make them "float slowly", duration should be high (4-8s)
+    if (!h1) return;
 
-    const xMove = Math.random() * 200 - 100; // -100 to 100
-    const yMove = Math.random() * 200 - 100;
+    h1.innerHTML = text
+        .split("")
+        .map(letter => {
+            console.log(letter);
+            return `<span>` + (letter === " " ? "&nbsp;" : letter) + `</span>`;
+        })
+        .join("");
 
-    gsap.to(node, {
-        x: xMove,
-        y: yMove,
-        duration: Math.random() * 5 + 5, // 5 to 10 seconds
-        ease: "sine.inOut",
-        force3D: false, // CRITICAL: Keeps element in 2D context for mix-blend-mode to work
-        onComplete: () => animateNode(node) // Recursively call for continuous non-repeating path
+    Array.from(h1.children).forEach((span, index) => {
+        setTimeout(() => {
+            span.classList.add("wavy");
+        }, index * 250 + delay);
+    });
+}
+
+// Mobile: Toggle tooltip on tap
+if ('ontouchstart' in window) {
+    nodes.forEach(node => {
+        node.addEventListener('touchstart', function (e) {
+            // Don't interfere with dragging
+            if (!this.classList.contains('show-tooltip')) {
+                e.preventDefault();
+                // Remove tooltip from all other nodes
+                nodes.forEach(n => n.classList.remove('show-tooltip'));
+                // Add to this one
+                this.classList.add('show-tooltip');
+
+                // Auto-hide after 2 seconds
+                setTimeout(() => {
+                    this.classList.remove('show-tooltip');
+                }, 2000);
+            }
+        });
     });
 }
 

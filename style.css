@@ -135,12 +135,27 @@ body:hover .cursor-follower {
     width: 0;
     height: 1px;
     bottom: -5px;
-    left: 0;
     background-color: var(--accent-color);
-    transition: width 0.3s ease;
+    transition: width 0.3s ease, left 0.3s ease, right 0.3s ease;
 }
 
-.nav-link:hover::after {
+/* Left to Right animation */
+.nav-link.hover-from-left::after {
+    left: 0;
+    right: auto;
+}
+
+.nav-link.hover-from-left:hover::after {
+    width: 100%;
+}
+
+/* Right to Left animation */
+.nav-link.hover-from-right::after {
+    right: 0;
+    left: auto;
+}
+
+.nav-link.hover-from-right:hover::after {
     width: 100%;
 }
 
@@ -425,6 +440,35 @@ body:hover .cursor-follower {
     letter-spacing: 2px;
 }
 
+.skills-header span {
+    display: inline-block;
+    transition: transform 0.3s ease;
+}
+
+.skills-header span.wavy {
+    animation-name: wavy;
+    animation-duration: 1.3s;
+    animation-timing-function: ease;
+    animation-iteration-count: infinite;
+    position: relative;
+    top: 0;
+    left: 0;
+}
+
+@keyframes wavy {
+    0% {
+        top: 0px;
+    }
+
+    50% {
+        top: -15px;
+    }
+
+    100% {
+        top: 0px;
+    }
+}
+
 .diagonal-wrapper {
     position: relative;
     width: 100%;
@@ -442,7 +486,6 @@ body:hover .cursor-follower {
     background-color: var(--inverse-bg);
     /* #fff */
     clip-path: polygon(0 0, 100% 0, 0 100%);
-    z-index: 1;
 }
 
 /* Right/Bottom Half (Black) */
@@ -454,7 +497,6 @@ body:hover .cursor-follower {
     height: 100%;
     background-color: var(--bg-color);
     /* #050505 */
-    z-index: 0;
 }
 
 /* Network Nodes */
@@ -464,7 +506,6 @@ body:hover .cursor-follower {
     left: 0;
     width: 100%;
     height: 100%;
-    z-index: 2;
     /* Above both diagonals */
     pointer-events: none;
 }
@@ -487,9 +528,36 @@ body:hover .cursor-follower {
     cursor: pointer;
     pointer-events: auto;
 
-    /* The Magic Sauce */
     mix-blend-mode: exclusion;
-    transition: transform 0.3s ease, border-radius 0.3s;
+    transition: border-radius 0.3s;
+    user-select: none;
+    touch-action: none;
+}
+
+@keyframes wobble {
+    0% {
+        transform: scale(1);
+    }
+
+    20% {
+        transform: scale(1.1, 0.9);
+    }
+
+    50% {
+        transform: scale(0.9, 1.1);
+    }
+
+    80% {
+        transform: scale(1.05, 0.95);
+    }
+
+    100% {
+        transform: scale(1);
+    }
+}
+
+.skill-node.wobble-anim {
+    animation: wobble 0.5s ease;
 }
 
 /* Hover State: Restore color and scale */
@@ -498,66 +566,115 @@ body:hover .cursor-follower {
     /* Slightly reduced scale since base is larger */
     mix-blend-mode: normal;
     /* Disable difference to show true color */
+    background-color: #111;
+    /* Consistent Dark Background for ALL on hover */
     z-index: 20;
     /* Pop to top */
-    box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+    border: 2px solid #333;
 }
 
 .skill-node:hover i {
     color: inherit;
-    /* Use the parent's color */
+    /* Use the parent's color for the icon */
 }
 
-/* Specific Brand Colors on Hover */
+/* Also apply to active/tap states */
+.skill-node:active i,
+.skill-node.show-tooltip i {
+    color: inherit;
+}
+
+/* Specific Brand Colors on Hover (Icon Only) */
 .skill-node[data-skill="React"]:hover {
-    background: #20232a;
     color: #61dafb;
 }
 
 .skill-node[data-skill="JavaScript"]:hover {
-    background: #323330;
     color: #f7df1e;
 }
 
 .skill-node[data-skill="Python"]:hover {
-    background: #306998;
     color: #ffe873;
 }
 
 .skill-node[data-skill="Java"]:hover {
-    background: #fff;
     color: #5382a1;
 }
 
 .skill-node[data-skill="HTML5"]:hover {
-    background: #fff;
     color: #e34f26;
 }
 
 .skill-node[data-skill="CSS3"]:hover {
-    background: #fff;
     color: #1572b6;
 }
 
 .skill-node[data-skill="Node.js"]:hover {
-    background: #333;
     color: #68a063;
 }
 
 .skill-node[data-skill="SQL"]:hover {
-    background: #fff;
     color: #00758f;
 }
 
 .skill-node[data-skill="Git"]:hover {
-    background: #fca326;
-    color: #3e2c00;
+    color: #fca326;
 }
 
-/* Git Orange */
 .skill-node[data-skill="Bootstrap"]:hover {
-    background: #563d7c;
-    color: #fff;
+    color: #7952b3;
+}
+
+/* Ensure brand colors work on mobile tap too */
+.skill-node[data-skill="React"]:active,
+.skill-node[data-skill="React"].show-tooltip {
+    color: #61dafb;
+}
+
+.skill-node[data-skill="JavaScript"]:active,
+.skill-node[data-skill="JavaScript"].show-tooltip {
+    color: #f7df1e;
+}
+
+.skill-node[data-skill="Python"]:active,
+.skill-node[data-skill="Python"].show-tooltip {
+    color: #ffe873;
+}
+
+.skill-node[data-skill="Java"]:active,
+.skill-node[data-skill="Java"].show-tooltip {
+    color: #5382a1;
+}
+
+.skill-node[data-skill="HTML5"]:active,
+.skill-node[data-skill="HTML5"].show-tooltip {
+    color: #e34f26;
+}
+
+.skill-node[data-skill="CSS3"]:active,
+.skill-node[data-skill="CSS3"].show-tooltip {
+    color: #1572b6;
+}
+
+.skill-node[data-skill="Node.js"]:active,
+.skill-node[data-skill="Node.js"].show-tooltip {
+    color: #68a063;
+}
+
+.skill-node[data-skill="SQL"]:active,
+.skill-node[data-skill="SQL"].show-tooltip {
+    color: #00758f;
+}
+
+.skill-node[data-skill="Git"]:active,
+.skill-node[data-skill="Git"].show-tooltip {
+    color: #fca326;
+}
+
+.skill-node[data-skill="Bootstrap"]:active,
+.skill-node[data-skill="Bootstrap"].show-tooltip {
+    color: #7952b3;
 }
 
 
@@ -565,23 +682,30 @@ body:hover .cursor-follower {
 .skill-node::after {
     content: attr(data-skill);
     position: absolute;
-    bottom: -25px;
+    bottom: -35px;
     left: 50%;
     transform: translateX(-50%);
     opacity: 0;
     white-space: nowrap;
     transition: opacity 0.3s;
-    font-size: 0.7rem;
+    font-size: 0.8rem;
     letter-spacing: 1px;
     font-family: var(--font-mono);
     color: #fff;
-    /* Default to white text for tooltip */
-    text-shadow: 0 0 2px #000;
-    /* Shadow for visibility on white bg */
+    background-color: rgba(0, 0, 0, 0.8);
+    padding: 4px 8px;
+    border-radius: 4px;
     pointer-events: none;
+    z-index: 100;
 }
 
 .skill-node:hover::after {
+    opacity: 1;
+}
+
+/* Show tooltip on active (tap) for mobile */
+.skill-node:active::after,
+.skill-node.show-tooltip::after {
     opacity: 1;
 }
 
@@ -852,6 +976,148 @@ body:hover .cursor-follower {
     .hero-left {
         align-items: center;
     }
+
+    /* Skills Section - Tablet Optimization */
+    .skills-section {
+        min-height: 70vh;
+        margin: 3rem 0;
+        background-color: #ffffff;
+        /* Solid white background */
+    }
+
+    .diagonal-wrapper {
+        position: relative;
+        height: 70vh;
+        display: block;
+        background-color: #ffffff;
+        /* White background */
+    }
+
+    .diagonal-white,
+    .diagonal-black {
+        display: none;
+        /* Hide diagonal split on tablet */
+    }
+
+    .skills-network {
+        position: absolute;
+        height: 100%;
+        width: 100%;
+        top: 0;
+        left: 0;
+        background-color: transparent;
+    }
+
+    .skill-node {
+        width: 70px;
+        height: 70px;
+        font-size: 2rem;
+        /* Black circles on white background */
+        background-color: #000000 !important;
+        color: #ffffff !important;
+        mix-blend-mode: normal !important;
+        border: 2px solid #333;
+    }
+
+    .skill-node:hover {
+        transform: scale(1.2);
+        background-color: #111 !important;
+        box-shadow: 0 0 25px rgba(0, 0, 0, 0.3);
+    }
+
+    .skills-header {
+        width: 100%;
+        padding: 0 1rem;
+        top: 5%;
+        mix-blend-mode: normal;
+        /* Normal blend on white */
+        color: #000000;
+        /* Black text on white background */
+    }
+
+    .skills-header h2 {
+        font-size: 2rem;
+        letter-spacing: 1.5px;
+        color: #000000;
+    }
+
+    .skills-header span.wavy {
+        color: #000000;
+        /* Keep black during animation */
+    }
+
+    /* Override wavy animation for tablet */
+    @keyframes wavy {
+        0% {
+            top: 0px;
+        }
+
+        50% {
+            top: -15px;
+        }
+
+        100% {
+            top: 0px;
+        }
+    }
+
+    /* Mobile-friendly skill tooltips */
+    .skill-node::after {
+        font-size: 0.7rem;
+        padding: 3px 6px;
+        bottom: -30px;
+    }
+
+    /* Show brand colors on tap/active */
+    .skill-node[data-skill="React"]:active i,
+    .skill-node[data-skill="React"].show-tooltip i {
+        color: #61dafb;
+    }
+
+    .skill-node[data-skill="JavaScript"]:active i,
+    .skill-node[data-skill="JavaScript"].show-tooltip i {
+        color: #f7df1e;
+    }
+
+    .skill-node[data-skill="Python"]:active i,
+    .skill-node[data-skill="Python"].show-tooltip i {
+        color: #ffe873;
+    }
+
+    .skill-node[data-skill="Java"]:active i,
+    .skill-node[data-skill="Java"].show-tooltip i {
+        color: #5382a1;
+    }
+
+    .skill-node[data-skill="HTML5"]:active i,
+    .skill-node[data-skill="HTML5"].show-tooltip i {
+        color: #e34f26;
+    }
+
+    .skill-node[data-skill="CSS3"]:active i,
+    .skill-node[data-skill="CSS3"].show-tooltip i {
+        color: #1572b6;
+    }
+
+    .skill-node[data-skill="Node.js"]:active i,
+    .skill-node[data-skill="Node.js"].show-tooltip i {
+        color: #68a063;
+    }
+
+    .skill-node[data-skill="SQL"]:active i,
+    .skill-node[data-skill="SQL"].show-tooltip i {
+        color: #00758f;
+    }
+
+    .skill-node[data-skill="Git"]:active i,
+    .skill-node[data-skill="Git"].show-tooltip i {
+        color: #fca326;
+    }
+
+    .skill-node[data-skill="Bootstrap"]:active i,
+    .skill-node[data-skill="Bootstrap"].show-tooltip i {
+        color: #7952b3;
+    }
 }
 
 /* Mobile (768px) */
@@ -938,33 +1204,149 @@ body:hover .cursor-follower {
     }
 
     /* Sections */
+    /* Skills Section Mobile Optimization */
+    .skills-section {
+        min-height: 75vh;
+        margin: 2rem 0;
+        background-color: #ffffff;
+        /* Solid white background */
+    }
+
     .diagonal-wrapper {
-        flex-direction: column;
-    }
-
-    .diagonal-white {
-        clip-path: none;
         position: relative;
-        height: auto;
-        min-height: 300px;
-        padding: 4rem 2rem;
-        justify-content: center;
-        text-align: center;
-        width: 100%;
+        height: 75vh;
+        display: block;
+        background-color: #ffffff;
+        /* White background */
     }
 
+    .diagonal-white,
     .diagonal-black {
-        position: relative;
-        height: auto;
-        min-height: 300px;
-        width: 100%;
+        display: none;
+        /* Hide diagonal split on mobile */
     }
 
     .skills-network {
-        position: relative;
-        /* Let it flow in black section? No, keeps absolute logic inside relative parent */
-        height: 300px;
-        /* Force height for nodes area */
+        position: absolute;
+        height: 100%;
+        width: 100%;
+        top: 0;
+        left: 0;
+        background-color: transparent;
+    }
+
+    .skill-node {
+        width: 60px;
+        height: 60px;
+        font-size: 1.8rem;
+        /* Black circles on white background */
+        background-color: #000000 !important;
+        color: #ffffff !important;
+        mix-blend-mode: normal !important;
+        border: 2px solid #333;
+        touch-action: none;
+        /* Enable dragging on touch */
+    }
+
+    .skill-node:hover,
+    .skill-node:active {
+        transform: scale(1.15);
+        background-color: #111 !important;
+        box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+    }
+
+    .skills-header {
+        width: 100%;
+        padding: 0 1rem;
+        top: 5%;
+        mix-blend-mode: normal;
+        /* Normal blend on white */
+        color: #000000;
+        /* Black text */
+    }
+
+    .skills-header h2 {
+        font-size: 1.6rem;
+        letter-spacing: 1px;
+        color: #000000;
+    }
+
+    .skills-header span.wavy {
+        color: #000000;
+        /* Keep black during animation */
+    }
+
+    /* Override wavy animation for mobile */
+    @keyframes wavy {
+        0% {
+            top: 0px;
+        }
+
+        50% {
+            top: -12px;
+        }
+
+        100% {
+            top: 0px;
+        }
+    }
+
+    /* Mobile-friendly skill tooltips - smaller */
+    .skill-node::after {
+        font-size: 0.65rem;
+        padding: 2px 5px;
+        bottom: -28px;
+    }
+
+    /* Show brand colors on tap/active for mobile */
+    .skill-node[data-skill="React"]:active i,
+    .skill-node[data-skill="React"].show-tooltip i {
+        color: #61dafb;
+    }
+
+    .skill-node[data-skill="JavaScript"]:active i,
+    .skill-node[data-skill="JavaScript"].show-tooltip i {
+        color: #f7df1e;
+    }
+
+    .skill-node[data-skill="Python"]:active i,
+    .skill-node[data-skill="Python"].show-tooltip i {
+        color: #ffe873;
+    }
+
+    .skill-node[data-skill="Java"]:active i,
+    .skill-node[data-skill="Java"].show-tooltip i {
+        color: #5382a1;
+    }
+
+    .skill-node[data-skill="HTML5"]:active i,
+    .skill-node[data-skill="HTML5"].show-tooltip i {
+        color: #e34f26;
+    }
+
+    .skill-node[data-skill="CSS3"]:active i,
+    .skill-node[data-skill="CSS3"].show-tooltip i {
+        color: #1572b6;
+    }
+
+    .skill-node[data-skill="Node.js"]:active i,
+    .skill-node[data-skill="Node.js"].show-tooltip i {
+        color: #68a063;
+    }
+
+    .skill-node[data-skill="SQL"]:active i,
+    .skill-node[data-skill="SQL"].show-tooltip i {
+        color: #00758f;
+    }
+
+    .skill-node[data-skill="Git"]:active i,
+    .skill-node[data-skill="Git"].show-tooltip i {
+        color: #fca326;
+    }
+
+    .skill-node[data-skill="Bootstrap"]:active i,
+    .skill-node[data-skill="Bootstrap"].show-tooltip i {
+        color: #7952b3;
     }
 
     .timeline-line {
