@@ -112,39 +112,40 @@
         </div>
     </section>
 
-    <!-- Education Section (Scroll Progress) -->
+    <!-- Education Section (Scroll Progress with Cards) -->
     <section id="education" class="education-section">
         <div class="container">
             <h2 class="section-title">Education</h2>
-            <div class="timeline-container">
-                <!-- The Scroll Line -->
-                <div class="timeline-line">
-                    <div class="timeline-ball"></div>
+
+            <!-- Scroll Progress Bar -->
+            <div class="education-scroll-container">
+                <div class="scroll-line">
+                    <div class="scroll-line-fill"></div>
+                    <div class="scroll-ball"></div>
+
+                    <!-- Checkpoint Circles -->
+                    <div class="checkpoint-circle" data-position="33.33"></div>
+                    <div class="checkpoint-circle" data-position="66.66"></div>
+                    <div class="checkpoint-circle" data-position="100"></div>
                 </div>
 
-                <!-- Timeline Items -->
-                <div class="timeline-item left">
-                    <div class="timeline-content">
-                        <h3>ITM (SLS) Vadodara University</h3>
-                        <span class="date">Oct 2022 – Present</span>
-                        <p>Pursuing Bachelor's in Computer Science Engineering (CSE)</p>
-                    </div>
+                <!-- Education Cards - Left, Right, Left -->
+                <div class="education-card card-left" data-progress="33.33">
+                    <h3 class="card-title"></h3>
+                    <span class="card-date"></span>
+                    <p class="card-desc"></p>
                 </div>
 
-                <div class="timeline-item right">
-                    <div class="timeline-content">
-                        <h3>Podar International School, Surat</h3>
-                        <span class="date">Mar 2019 – Jun 2020</span>
-                        <p>Higher Secondary (PCM – Science Stream)</p>
-                    </div>
+                <div class="education-card card-right" data-progress="66.66">
+                    <h3 class="card-title"></h3>
+                    <span class="card-date"></span>
+                    <p class="card-desc"></p>
                 </div>
 
-                <div class="timeline-item left">
-                    <div class="timeline-content">
-                        <h3>Samrat International School, Surat</h3>
-                        <span class="date">Mar 2017 – May 2018</span>
-                        <p>Secondary School (Science, Mathematics, Social Studies, English, Computer Science)</p>
-                    </div>
+                <div class="education-card card-left" data-progress="100">
+                    <h3 class="card-title"></h3>
+                    <span class="card-date"></span>
+                    <p class="card-desc"></p>
                 </div>
             </div>
         </div>

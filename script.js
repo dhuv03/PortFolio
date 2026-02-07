@@ -7,7 +7,7 @@ console.log("Portfolio Loaded");
    1. CUSTOM CURSOR
    ========================================= */
 const cursor = document.querySelector('.cursor-follower');
-const links = document.querySelectorAll('a, .btn, .skill-node, .hero-name, .hover-invert-word, .social-link'); // Added social-link
+const links = document.querySelectorAll('a, .btn, .skill-node, .hero-name, .hover-invert-word, .social-link, .education-card'); // Added education-card
 
 document.addEventListener('mousemove', (e) => {
     gsap.to(cursor, {
@@ -592,52 +592,274 @@ if ('ontouchstart' in window) {
 }
 
 /* =========================================
-   4. EDUCATION SCROLL LINE
+   4. EDUCATION SCROLL CARDS WITH TYPEWRITER
    ========================================= */
-// Animate the Line Height? Or Ball Position?
-// User said: "ball thing made of blackl will go down as we scroll"
-// And "bar will be initally white empty and black line with a ball... will go down"
 
-// We have .timeline-line (bg rgba(0,0,0,0.1))
-// We'll create a "fill" like effect if needed, but moving ball is key.
+// Education data
+const educationData = [
+    {
+        title: "Secondary School (10th)",
+        date: "Mar 2017 – May 2018",
+        desc: "Samrat International School, Surat. Subjects: Science, Mathematics, Social Studies, English, Computer Science"
+    },
+    {
+        title: "Higher Secondary (12th)",
+        date: "Mar 2019 – Jun 2020",
+        desc: "Podar International School, Surat. Stream: PCM (Physics, Chemistry, Mathematics) – Science Stream"
+    },
+    {
+        title: "Bachelor's in CSE",
+        date: "Oct 2022 – Present",
+        desc: "ITM (SLS) Vadodara University. Pursuing Bachelor's in Computer Science Engineering with focus on Web Development & ML"
+    }
+];
+
+// Card animation logic
+let currentCardIndex = -1;
+let animationId = 0; // Track current animation session
+const cards = document.querySelectorAll('.education-card');
+const checkpoints = document.querySelectorAll('.checkpoint-circle');
+
+// Simple non-blocking typewriter
+function startTypewriter(element, text, speed = 50, sessionId) {
+    element.textContent = '';
+    element.classList.add('typing');
+
+    let charIndex = 0;
+
+    function type() {
+        // Stop if a new animation session has started
+        if (sessionId !== animationId) {
+            element.classList.remove('typing');
+            return;
+        }
+
+        if (charIndex < text.length) {
+            element.textContent += text.charAt(charIndex);
+            charIndex++;
+            setTimeout(type, speed);
+        } else {
+            element.classList.remove('typing');
+        }
+    }
+
+    type();
+}
+
+function showCard(index) {
+    if (index === currentCardIndex || index < 0 || index >= cards.length) return;
+
+    // Increment animation ID to cancel any running typewriters
+    animationId++;
+    const currentSession = animationId;
+
+    // Hide previous card
+    if (currentCardIndex >= 0 && currentCardIndex < cards.length) {
+        const prevCard = cards[currentCardIndex];
+        prevCard.classList.remove('active');
+        prevCard.classList.add('fade-out');
+
+        // Clear previous card text
+        prevCard.querySelector('.card-title').textContent = '';
+        prevCard.querySelector('.card-date').textContent = '';
+        prevCard.querySelector('.card-desc').textContent = '';
+        prevCard.querySelector('.card-title').classList.remove('typing');
+        prevCard.querySelector('.card-date').classList.remove('typing');
+        prevCard.querySelector('.card-desc').classList.remove('typing');
+
+        // Deactivate previous checkpoint
+        if (checkpoints[currentCardIndex]) {
+            checkpoints[currentCardIndex].classList.remove('active');
+        }
+    }
+
+    currentCardIndex = index;
+    const card = cards[index];
+    const data = educationData[index];
+
+    // Remove fade-out from target card
+    card.classList.remove('fade-out');
+
+    // Activate checkpoint circle
+    if (checkpoints[index]) {
+        checkpoints[index].classList.add('active');
+    }
+
+    // Show card
+    card.classList.add('active');
+
+    // Get elements
+    const titleEl = card.querySelector('.card-title');
+    const dateEl = card.querySelector('.card-date');
+    const descEl = card.querySelector('.card-desc');
+
+    // Clear existing text first
+    titleEl.textContent = '';
+    dateEl.textContent = '';
+    descEl.textContent = '';
+
+    // Start typewriter animations with delays
+    setTimeout(() => {
+        if (currentSession === animationId) {
+            startTypewriter(titleEl, data.title, 35, currentSession);
+        }
+    }, 100);
+
+    setTimeout(() => {
+        if (currentSession === animationId) {
+            startTypewriter(dateEl, data.date, 25, currentSession);
+        }
+    }, 600);
+
+    setTimeout(() => {
+        if (currentSession === animationId) {
+            startTypewriter(descEl, data.desc, 12, currentSession);
+        }
+    }, 1000);
+}
+
+// Scroll-based card trigger
+const educationSection = document.querySelector('.education-section');
+const scrollLine = document.querySelector('.scroll-line');
+const scrollBall = document.querySelector('.scroll-ball');
+const scrollLineFill = document.querySelector('.scroll-line-fill');
+
+// Track last scroll direction and progress
+let lastProgress = 0;
 
 ScrollTrigger.create({
     trigger: ".education-section",
     start: "top center",
     end: "bottom center",
-    scrub: 1, // Smooth scrubbing
+    scrub: 1,
     onUpdate: (self) => {
-        // self.progress (0 to 1)
-        // Move the ball
-        gsap.to(".timeline-ball", {
-            top: (self.progress * 100) + "%",
-            duration: 0.1,
-            ease: "none",
-            overwrite: "auto"
+        const progress = self.progress * 100;
+        const scrollDirection = progress > lastProgress ? 'down' : 'up';
+        lastProgress = progress;
+
+        // Remove hidden class when in section
+        educationSection.classList.remove('section-hidden');
+
+        // Move the scroll ball - position it along the scroll line
+        if (scrollBall) {
+            scrollBall.style.top = progress + '%';
+        }
+
+        // Animate the fill effect
+        if (scrollLineFill) {
+            scrollLineFill.style.height = progress + '%';
+        }
+
+        // Update checkpoint states based on ball position
+        checkpoints.forEach((checkpoint, index) => {
+            const checkpointPosition = parseFloat(checkpoint.dataset.position);
+
+            // Calculate distance from ball to checkpoint
+            const distance = Math.abs(progress - checkpointPosition);
+
+            if (distance < 10) {
+                // Ball is near this checkpoint - activate it
+                checkpoint.classList.add('active');
+                checkpoint.classList.remove('passed');
+            } else if (progress > checkpointPosition + 10) {
+                // Ball has passed this checkpoint
+                checkpoint.classList.add('passed');
+                checkpoint.classList.remove('active');
+            } else {
+                // Ball hasn't reached this checkpoint yet
+                checkpoint.classList.remove('active');
+                checkpoint.classList.remove('passed');
+            }
         });
 
-        // Optional: Fill the line behind it?
-        // We can use a linear gradient on the line container to simulate fill
-        const line = document.querySelector('.timeline-line');
-        // Black fill on top, faint on bottom
-        line.style.background = `linear-gradient(to bottom, #000 ${self.progress * 100}%, rgba(0,0,0,0.1) ${self.progress * 100}%)`;
+        // Show cards with adjusted ranges for equal reading time
+        // Card 1: 20-50% (30% range)
+        if (progress >= 20 && progress < 50) {
+            showCard(0);
+        }
+        // Card 2: 50-75% (25% range)
+        else if (progress >= 50 && progress < 75) {
+            showCard(1);
+        }
+        // Card 3: 75-100% (25% range - same as other cards)
+        else if (progress >= 75) {
+            showCard(2);
+        }
+        // Before first checkpoint - hide all cards
+        else if (progress < 20) {
+            hideAllCards();
+        }
+    },
+    onEnter: () => {
+        // Reset state when entering section from above
+        educationSection.classList.remove('section-hidden');
+
+        // Reset ball and fill to start
+        if (scrollBall) {
+            scrollBall.style.top = '0%';
+        }
+        if (scrollLineFill) {
+            scrollLineFill.style.height = '0%';
+        }
+    },
+    onLeave: () => {
+        // When scrolling past the section completely
+        educationSection.classList.add('section-hidden');
+        checkpoints.forEach(checkpoint => {
+            checkpoint.classList.remove('active');
+            checkpoint.classList.remove('passed');
+        });
+        hideAllCards();
+    },
+    onEnterBack: () => {
+        // When scrolling back into section from bottom
+        educationSection.classList.remove('section-hidden');
+
+        // Set ball and fill to end (100%)
+        if (scrollBall) {
+            scrollBall.style.top = '100%';
+        }
+        if (scrollLineFill) {
+            scrollLineFill.style.height = '100%';
+        }
+    },
+    onLeaveBack: () => {
+        // When scrolling back up past the section
+        educationSection.classList.add('section-hidden');
+        checkpoints.forEach(checkpoint => {
+            checkpoint.classList.remove('active');
+            checkpoint.classList.remove('passed');
+        });
+        hideAllCards();
+
+        // Reset ball and fill
+        if (scrollBall) {
+            scrollBall.style.top = '0%';
+        }
+        if (scrollLineFill) {
+            scrollLineFill.style.height = '0%';
+        }
     }
 });
 
-// Animate Items fading in
-const items = document.querySelectorAll('.timeline-item');
-items.forEach(item => {
-    gsap.from(item, {
-        opacity: 0,
-        y: 50,
-        duration: 1,
-        scrollTrigger: {
-            trigger: item,
-            start: "top 80%",
-            toggleActions: "play none none reverse"
-        }
+// Function to hide all cards
+function hideAllCards() {
+    // Increment animation ID to cancel any running typewriters
+    animationId++;
+
+    cards.forEach(card => {
+        card.classList.remove('active');
+        card.classList.add('fade-out');
+        // Clear text content and typing class
+        card.querySelector('.card-title').textContent = '';
+        card.querySelector('.card-date').textContent = '';
+        card.querySelector('.card-desc').textContent = '';
+        card.querySelector('.card-title').classList.remove('typing');
+        card.querySelector('.card-date').classList.remove('typing');
+        card.querySelector('.card-desc').classList.remove('typing');
     });
-});
+    currentCardIndex = -1;
+}
 
 /* =========================================
    5. PROJECTS SLIDE UP
